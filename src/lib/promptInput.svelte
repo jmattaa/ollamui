@@ -1,6 +1,21 @@
 <script lang="ts">
     import { getResponse, createResponseDiv } from "../utils";
 
+    let selectedModel: string;
+    let availableModels: string[] = [];
+    fetch("http://localhost:11434/api/tags").then(async (data) => {
+        let availableModelsObj = await data.json();
+
+        for (let i = 0; i < availableModelsObj.models.length; i++) {
+            const availableModel = availableModelsObj.models[i];
+            availableModels.push(availableModel.model);
+        }
+
+        // for some reason i need to do this so svelte detects a change
+        availableModels = availableModels;
+        selectedModel = availableModels[0];
+    });
+
     let promptInp = "";
 
     const sendPrompt = (e: Event) => {
@@ -12,7 +27,7 @@
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                model: "llama2",
+                model: selectedModel,
                 prompt: promptInp,
             }),
         }).then(async (res) => {
@@ -37,6 +52,11 @@
             placeholder="Prompt"
             bind:value={promptInp}
         />
+        <select class="bg-black" bind:value={selectedModel}>
+            {#each availableModels as value}
+                <option {value}>{value}</option>
+            {/each}
+        </select>
         <button
             disabled={!promptInp}
             type="submit"

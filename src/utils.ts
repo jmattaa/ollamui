@@ -14,8 +14,14 @@ export async function getResponse(response: Response, callback: Function) {
         const textChunk = new TextDecoder().decode(value);
         const lines = (partialLine + textChunk).split("\n");
 
-        const parsedResponse = JSON.parse(lines[0]);
-        callback(parsedResponse);
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line === "")
+                continue;
+
+            const parsedResponse = JSON.parse(line);
+            callback(parsedResponse);
+        }
 
     }
 }
